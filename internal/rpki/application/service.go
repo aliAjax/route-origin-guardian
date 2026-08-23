@@ -19,7 +19,13 @@ type Service struct {
 }
 
 func NewService(i *domain.Index) *Service { return &Service{index: i} }
-func (s *Service) Import(_ context.Context, snap Snapshot) error {
+func (s *Service) Import(ctx context.Context, snap Snapshot) error {
+	// Honor cancellation: a refresh that fetched slowly may have been abandoned
+	// while it was in flight. Re-check before swapping the index so a half-read
+	// snapshot never overwrites the live one.
+	if e := ctx.Err(); e != nil {
+		return e
+	}
 	b, e := json.Marshal(struct {
 		Serial uint64
 		ROAs   []domain.ROA
@@ -30,6 +36,9 @@ func (s *Service) Import(_ context.Context, snap Snapshot) error {
 	d := sha256.Sum256(b)
 	if snap.Digest != "" && snap.Digest != fmt.Sprintf("%x", d) {
 		return fmt.Errorf("snapshot digest mismatch")
+	}
+	if e = ctx.Err(); e != nil {
+		return e
 	}
 	if e = s.index.Replace(snap.ROAs); e != nil {
 		return fmt.Errorf("replace ROA index: %w", e)

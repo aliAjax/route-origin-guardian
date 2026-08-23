@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/routeorigin/route-origin-guardian/internal/rpki/adapter"
 	"github.com/routeorigin/route-origin-guardian/internal/rpki/application"
@@ -17,6 +18,8 @@ type Loader struct {
 	lastErr  error
 }
 
+func (l *Loader) Load(ctx context.Context) error { return l.load(ctx) }
+
 func NewLoader(src adapter.Source, svc *application.Service, interval time.Duration) *Loader {
 	if interval <= 0 {
 		interval = time.Minute
@@ -27,7 +30,7 @@ func (l *Loader) Run(ctx context.Context) error {
 	tick := time.NewTicker(l.interval)
 	defer tick.Stop()
 	for {
-		if e := l.load(ctx); e != nil {
+		if e := l.load(ctx); e != nil && !errors.Is(e, context.Canceled) {
 			l.mu.Lock()
 			l.lastErr = e
 			l.mu.Unlock()
@@ -40,6 +43,9 @@ func (l *Loader) Run(ctx context.Context) error {
 	}
 }
 func (l *Loader) load(ctx context.Context) error {
+	if e := ctx.Err(); e != nil {
+		return e
+	}
 	snap, e := l.source.Fetch(ctx)
 	if e != nil {
 		return fmt.Errorf("fetch ROA: %w", e)
