@@ -38,6 +38,11 @@ func AnalyzeError(r domain.Route) error {
 	return nil
 }
 
-func IsRetryable(err error) bool { return false }
+func IsRetryable(err error) bool { return errors.Is(err, ErrRetryable) }
 
-func RetryableKind(err error) string { return "other" }
+func RetryableKind(err error) string {
+	if errors.Is(err, ErrRetryable) {
+		return "retryable"
+	}
+	return "other"
+}

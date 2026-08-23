@@ -40,7 +40,7 @@ func Evaluate(p Policy, r rib.Route) []domain.Finding {
 
 func EvaluateWithError(p Policy, r rib.Route) error {
 	if err := domain.AnalyzeError(r); err != nil {
-		return fmt.Errorf("policy analysis failed: %v", err)
+		return fmt.Errorf("policy analysis failed: %w", err)
 	}
 	return nil
 }

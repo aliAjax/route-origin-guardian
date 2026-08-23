@@ -31,7 +31,7 @@ func (s *Suppressor) Clear(key string) { s.mu.Lock(); delete(s.until, key); s.mu
 
 func (s *Suppressor) RecordError(key string, now time.Time, err error) error {
 	if !s.Allow(key, now) {
-		return fmt.Errorf("suppressed: %v", err)
+		return fmt.Errorf("suppressed: %w", err)
 	}
-	return fmt.Errorf("analysis failed: %v", err)
+	return fmt.Errorf("analysis failed: %w", err)
 }
