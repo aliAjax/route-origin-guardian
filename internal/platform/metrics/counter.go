@@ -21,6 +21,13 @@ func NewRegistry() *Registry { return &Registry{counters: make(map[string]*Count
 func (r *Registry) Counter(name string) *Counter {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	// A zero-value Registry (e.g. an embedded struct field that was never
+	// constructed via NewRegistry) has a nil counters map; lazily allocate it
+	// so the first counter registration does not panic with
+	// "assignment to entry in nil map".
+	if r.counters == nil {
+		r.counters = make(map[string]*Counter)
+	}
 	if c := r.counters[name]; c != nil {
 		return c
 	}
