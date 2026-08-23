@@ -1,0 +1,11 @@
+services:
+  route-origin-guardian:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "8080:8080"
+      - "1790:1790"
+      - "11019:11019"
+    environment:
+      ROG_API_KEY: dev-key
