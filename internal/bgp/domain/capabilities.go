@@ -29,7 +29,10 @@ func Unique(caps []Capability) []Capability {
 			continue
 		}
 		seen[c.Code] = true
-		out = append(out, c)
+		// Defensive copy: without this, the returned Value slice would alias the
+		// caller's backing array, so a caller that mutates the deduplicated value
+		// would corrupt the original capabilities used by later checks.
+		out = append(out, Capability{Code: c.Code, Value: append([]byte(nil), c.Value...)})
 	}
 	return out
 }

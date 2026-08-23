@@ -1,6 +1,10 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+	"net/netip"
+	"strings"
+)
 
 type Message struct {
 	Type    uint8
@@ -35,10 +39,9 @@ func Decode(b []byte) (Message, error) {
 	return Message{Type: b[18], Payload: append([]byte(nil), b[19:]...)}, nil
 }
 func PrefixBits(prefix string) (int, error) {
-	var a, b, c, d int
-	var n int
-	if _, e := fmt.Sscanf(prefix, "%d.%d.%d.%d/%d", &a, &b, &c, &d, &n); e != nil || n < 0 || n > 32 {
-		return 0, fmt.Errorf("invalid prefix")
+	p, e := netip.ParsePrefix(strings.TrimSpace(prefix))
+	if e != nil {
+		return 0, fmt.Errorf("invalid prefix: %w", e)
 	}
-	return n, nil
+	return p.Bits(), nil
 }
