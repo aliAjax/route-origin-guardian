@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Route Origin Guardian</title>
+  <style>
+    :root { color-scheme: light; font: 16px system-ui, sans-serif; background: #f5f7fa; color: #1f2937; }
+    body { max-width: 960px; margin: 0 auto; padding: 2rem; }
+    header { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid #d1d5db; }
+    .status { display: inline-flex; gap: .5rem; align-items: center; color: #166534; font-weight: 600; }
+    .dot { width: .65rem; height: .65rem; border-radius: 50%; background: #22c55e; }
+    section { margin-top: 2rem; background: white; border: 1px solid #e5e7eb; padding: 1.25rem; }
+    code { background: #eef2ff; padding: .15rem .3rem; }
+  </style>
+</head>
+<body>
+  <header><h1>Route Origin Guardian</h1><span class="status"><i class="dot"></i>collector online</span></header>
+  <section><h2>RPKI validation console</h2><p>Use the service API to inspect route announcements, ROA versions, and observer event cursors.</p><p>Health endpoint: <code>/healthz</code> &middot; readiness endpoint: <code>/readyz</code></p></section>
+</body>
+</html>
