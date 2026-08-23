@@ -1,0 +1,8 @@
+{
+  "name": "route-origin-guardian-console",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node -e \"require('fs').mkdirSync('dist',{recursive:true}); require('fs').copyFileSync('index.html','dist/index.html')\""
+  }
+}
