@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: Route Origin Guardian API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+security:
+  - ApiKey: []
+paths:
+  /healthz:
+    get: {security: [], responses: {"200": {description: healthy}}}
+  /readyz:
+    get: {security: [], responses: {"200": {description: ready}, "503": {description: unavailable}}}
+  /metrics:
+    get: {security: [], responses: {"200": {description: prometheus text}}}
+  /v1/routes:
+    get:
+      parameters:
+        - {name: tenant_id, in: query, schema: {type: string}}
+        - {name: prefix, in: query, schema: {type: string}}
+        - {name: asn, in: query, schema: {type: integer}}
+      responses: {"200": {description: routes}}
+    post:
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/Route'}}}}
+      responses: {"202": {description: accepted}, "422": {description: invalid route}}
+  /v1/events:
+    get:
+      parameters:
+        - {name: after, in: query, schema: {type: integer, format: int64}}
+        - {name: limit, in: query, schema: {type: integer, maximum: 500}}
+      responses: {"200": {description: event page}}
+  /v1/rpki/snapshots:
+    post: {requestBody: {required: true}, responses: {"202": {description: indexed}}}
+  /v1/rpki/validate:
+    get:
+      parameters:
+        - {name: prefix, in: query, required: true, schema: {type: string}}
+        - {name: asn, in: query, required: true, schema: {type: integer}}
+      responses: {"200": {description: validation result}}
+components:
+  securitySchemes:
+    ApiKey: {type: apiKey, in: header, name: X-API-Key}
+  schemas:
+    Route:
+      type: object
+      required: [tenant_id, observer_id, peer_address, prefix, origin_asn]
+      properties:
+        tenant_id: {type: string}
+        router_id: {type: string}
+        observer_id: {type: string}
+        peer_address: {type: string}
+        prefix: {type: string}
+        family: {type: string, enum: [ipv4-unicast, ipv6-unicast]}
+        origin_asn: {type: integer, format: int64}
+        as_path: {type: array, items: {type: integer}}
+        next_hop: {type: string}
+        operation: {type: string, enum: [announce, withdraw, replace]}
