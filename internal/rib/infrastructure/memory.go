@@ -21,13 +21,21 @@ func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{routes: make(map[string]domain.Route), max: 10000}
 }
 func (m *MemoryStore) Ready(context.Context) error { return nil }
-func (m *MemoryStore) Upsert(_ context.Context, r domain.Route) (domain.Event, error) {
+func (m *MemoryStore) Upsert(ctx context.Context, r domain.Route) (domain.Event, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.Event{}, err
+	}
+	r = cloneRoute(r)
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.routes[r.Key()] = r
 	return m.eventLocked(r), nil
 }
-func (m *MemoryStore) Withdraw(_ context.Context, r domain.Route) (domain.Event, error) {
+func (m *MemoryStore) Withdraw(ctx context.Context, r domain.Route) (domain.Event, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.Event{}, err
+	}
+	r = cloneRoute(r)
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	delete(m.routes, r.Key())
@@ -41,6 +49,19 @@ func (m *MemoryStore) eventLocked(r domain.Route) domain.Event {
 		m.events = m.events[len(m.events)-m.max:]
 	}
 	return e
+}
+func cloneRoute(r domain.Route) domain.Route {
+	r.ASPath = cloneSlice(r.ASPath)
+	r.Communities = cloneSlice(r.Communities)
+	return r
+}
+func cloneSlice[T any](s []T) []T {
+	if s == nil {
+		return nil
+	}
+	out := make([]T, len(s))
+	copy(out, s)
+	return out
 }
 func (m *MemoryStore) List(_ context.Context, q application.Query) ([]domain.Route, error) {
 	m.mu.RLock()

@@ -26,6 +26,9 @@ type Service struct {
 
 func NewService(s Store) *Service { return &Service{store: s, now: time.Now} }
 func (s *Service) Announce(ctx context.Context, r domain.Route) (domain.Event, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.Event{}, err
+	}
 	if err := validate(r); err != nil {
 		return domain.Event{}, err
 	}
@@ -34,6 +37,9 @@ func (s *Service) Announce(ctx context.Context, r domain.Route) (domain.Event, e
 	return s.store.Upsert(ctx, r)
 }
 func (s *Service) Replace(ctx context.Context, r domain.Route) (domain.Event, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.Event{}, err
+	}
 	if err := validate(r); err != nil {
 		return domain.Event{}, err
 	}
@@ -42,6 +48,9 @@ func (s *Service) Replace(ctx context.Context, r domain.Route) (domain.Event, er
 	return s.store.Upsert(ctx, r)
 }
 func (s *Service) Withdraw(ctx context.Context, r domain.Route) (domain.Event, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.Event{}, err
+	}
 	if r.Prefix == "" {
 		return domain.Event{}, fmt.Errorf("withdraw prefix: %w", ErrInvalidRoute)
 	}
