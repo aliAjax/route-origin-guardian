@@ -1,0 +1,8 @@
+syntax = "proto3";
+package routeorigin.v1;
+option go_package = "github.com/routeorigin/route-origin-guardian/api/grpc";
+message Route { string tenant_id=1; string prefix=2; uint32 origin_asn=3; string peer_address=4; }
+message RouteEvent { uint64 id=1; Route route=2; string operation=3; }
+message SubscribeRequest { uint64 after_id=1; string tenant_id=2; }
+service RouteOriginService { rpc Subscribe(SubscribeRequest) returns (stream RouteEvent); rpc Validate(Route) returns (Validation); }
+message Validation { string status=1; string reason=2; uint64 roa_version=3; }
