@@ -1,0 +1,7 @@
+http_listen: ":8080"
+bgp_listen: ":1790"
+bmp_listen: ":11019"
+log_level: INFO
+max_events: 10000
+read_timeout: 5s
+write_timeout: 5s
